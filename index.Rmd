@@ -1,0 +1,82 @@
+---
+title: "Post Distribution Summary"
+output: html_document
+---
+
+```{r, echo=FALSE, message=FALSE}
+setwd("~/Programming/Projects/R/PDMSummary/")
+source("password.R") ## loads a variable called password
+library(RCurl)
+library(stringr)
+upass = str_c("mcnepal:", password)
+dataStreamPdm = getURI("http://ona.io/api/v1/data/69069.csv", userpwd=upass, httpauth = 1L)
+pdm = read.csv(textConnection(dataStreamPdm), na.strings="n/a")
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+library(dplyr)
+library(jsonlite)
+
+pdm_sindhupalchowk = filter(pdm, pdm$sec_0.district_lst == "Sindupalchowk")
+pdm_nuwakot = filter(pdm, pdm$sec_0.district_lst == "Nawakot")
+pdm_kavre = filter(pdm, pdm$sec_0.district_lst == "Kabhre")
+pdm_dolakha = filter(pdm, pdm$sec_0.district_lst == "Dolakha")
+
+district_record_count = data.frame( c("Sindhupalchowk","Nuwakot","Kavrepalanchowk", "Dolakha"), c(nrow(pdm_sindhupalchowk),nrow(pdm_nuwakot),nrow(pdm_kavre),nrow(pdm_dolakha)))
+
+```
+
+```{r, echo=FALSE, message=FALSE}
+knitr::kable(district_record_count, col.names = c ("District","Number of Records"))
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+makeSummary <- function(district, vdc_col){
+district_summary <- as.data.frame.matrix (district %>% group_by_(vdc_col) %>% select(sec_1.respondent.ethnicity_lst) %>% table())
+district_summary$VDC <- rownames(district_summary) 
+district_vdc_count <- district %>% group_by_(vdc_col) %>% summarise(Records = n()) 
+district_summary <- merge(district_summary, district_vdc_count, by.y = vdc_col, by.x = "VDC")
+district_summary_female <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.respondent_female)%>% table())
+colnames(district_summary_female) <- c("Respondent Male","Respondent Female")
+district_summary_female$VDC <- rownames(district_summary_female)
+district_summary <- merge(district_summary, district_summary_female, by.y = "VDC", by.x = "VDC")
+district_summary_elderly <- as.data.frame.matrix (district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.elderly_people) %>% table())
+colnames(district_summary_elderly) <- c("No Elderly","Has Elderly")
+district_summary_elderly$VDC <- rownames(district_summary_elderly)
+district_summary <- merge(district_summary, district_summary_elderly, by.y = "VDC", by.x = "VDC")
+
+
+
+district_summary <- t(district_summary)
+colnames(district_summary) <- district_summary[1,]
+district_summary <- district_summary [-1,]
+return(district_summary)
+}
+
+dolakha_summary <- makeSummary(pdm_dolakha, "sec_0.vdc_dolakha")
+kavre_summary <- makeSummary(pdm_kavre, "sec_0.vdc_kabhre")
+nuwakot_summary <- makeSummary(pdm_nuwakot, "sec_0.vdc_nawakot")
+sindhupalchowk_summary <- makeSummary(pdm_sindhupalchowk, "sec_0.vdc_sindu")
+```
+##Dolakha Summary 
+```{r, echo=FALSE, message=FALSE}
+knitr::kable(dolakha_summary)
+```
+
+##Kavre Summary 
+```{r, echo=FALSE, message=FALSE}
+knitr::kable(kavre_summary)
+```
+
+##Nuwakot Summary 
+```{r, echo=FALSE, message=FALSE}
+knitr::kable(nuwakot_summary)
+```
+
+##Sindhupalchowk Summary 
+```{r, echo=FALSE, message=FALSE}
+knitr::kable(sindhupalchowk_summary)
+```
+
+Report Generated on `r date()` from `r nrow(pdm)` records. 
