@@ -75,14 +75,18 @@ district_summary <- merge(district_summary, district_vdc_count, by.y = vdc_col, 
 district_summary <- t(district_summary)
 colnames(district_summary) <- district_summary[1,]
 district_summary <- as.data.frame(district_summary [-1,])
-district_summary$DistrictTotal <- rowSums(sapply(district_summary, as.numeric))
+# district_summary$DistrictTotal <- rowSums(sapply(district_summary, as.numeric))
 return(district_summary)
 }
 
 dolakha_summary <- makeSummary(pdm_dolakha, "sec_0.vdc_dolakha")
+write(toJSON(dolakha_summary, preety = T),file = "JSONDump/dolakha_summary.json")
 kavre_summary <- makeSummary(pdm_kavre, "sec_0.vdc_kabhre")
+write(toJSON(kavre_summary, preety = T),file = "JSONDump/kavre_summary.json")
 nuwakot_summary <- makeSummary(pdm_nuwakot, "sec_0.vdc_nawakot")
+write(toJSON(nuwakot_summary, preety = T),file = "JSONDump/nuwakot_summary.json")
 sindhupalchowk_summary <- makeSummary(pdm_sindhupalchowk, "sec_0.vdc_sindu")
+write(toJSON(sindhupalchowk_summary, preety = T),file = "JSONDump/sindhupalchowk_summary.json")
 ```
 ##Dolakha Summary 
 ```{r, echo=FALSE, message=FALSE}
