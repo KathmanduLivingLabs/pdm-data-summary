@@ -32,25 +32,50 @@ knitr::kable(district_record_count, col.names = c ("District","Number of Records
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
+addColumnSummary <- function(district, vdc ,column, currentSummary, columnNames){
+district_summary_column <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select_(column)%>% table())
+colnames(district_summary_column) <- columnNames
+district_summary_column$VDC <- rownames(district_summary_column)
+currentSummary <- merge(currentSummary, district_summary_column, by.y = "VDC", by.x = "VDC") 
+return (currentSummary)
+}
+
+
 makeSummary <- function(district, vdc_col){
+
 district_summary <- as.data.frame.matrix (district %>% group_by_(vdc_col) %>% select(sec_1.respondent.ethnicity_lst) %>% table())
 district_summary$VDC <- rownames(district_summary) 
-district_vdc_count <- district %>% group_by_(vdc_col) %>% summarise(Records = n()) 
-district_summary <- merge(district_summary, district_vdc_count, by.y = vdc_col, by.x = "VDC")
+
+district_summary_disablity <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.physical_disability)%>% table())
+colnames(district_summary_disablity) <- c("Household Without Disablity","Household With Disablity")
+district_summary_disablity$VDC <- rownames(district_summary_disablity)
+district_summary <- merge(district_summary, district_summary_disablity, by.y = "VDC", by.x = "VDC")
+
 district_summary_female <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.respondent_female)%>% table())
 colnames(district_summary_female) <- c("Respondent Male","Respondent Female")
 district_summary_female$VDC <- rownames(district_summary_female)
 district_summary <- merge(district_summary, district_summary_female, by.y = "VDC", by.x = "VDC")
+
 district_summary_elderly <- as.data.frame.matrix (district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.elderly_people) %>% table())
 colnames(district_summary_elderly) <- c("No Elderly","Has Elderly")
 district_summary_elderly$VDC <- rownames(district_summary_elderly)
 district_summary <- merge(district_summary, district_summary_elderly, by.y = "VDC", by.x = "VDC")
 
+# district_summary <- addColumnSummary(district, vdc_col, "sec_1.respondent.hh_categories.elderly_people",district_summary,  c("No Elderly","Has Elderly"))
 
+district_summary_pregnant <- as.data.frame.matrix (district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.pregnant_lactating_women) %>% table())
+colnames(district_summary_pregnant)<- c("No Preagnant Women","Has Pregnant Women")
+district_summary_pregnant$VDC <- rownames(district_summary_pregnant)
+district_summary <- merge(district_summary, district_summary_pregnant, by.y = "VDC", by.x = "VDC")
+
+
+district_vdc_count <- district %>% group_by_(vdc_col) %>% summarise(TotalRecords = n()) 
+district_summary <- merge(district_summary, district_vdc_count, by.y = vdc_col, by.x = "VDC")
 
 district_summary <- t(district_summary)
 colnames(district_summary) <- district_summary[1,]
-district_summary <- district_summary [-1,]
+district_summary <- as.data.frame(district_summary [-1,])
+district_summary$DistrictTotal <- rowSums(sapply(district_summary, as.numeric))
 return(district_summary)
 }
 
