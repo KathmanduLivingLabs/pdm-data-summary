@@ -46,6 +46,11 @@ makeSummary <- function(district, vdc_col){
 district_summary <- as.data.frame.matrix (district %>% group_by_(vdc_col) %>% select(sec_1.respondent.ethnicity_lst) %>% table())
 district_summary$VDC <- rownames(district_summary) 
 
+district_summary_solarLamp <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_4.lantern_use)%>% table())
+colnames(district_summary_solarLamp) <- c("Solar Lamp Used Daily","Solar Lamp Used 4-5 Times/Week", "Solar Lamp Used 2-3 Times/Week", "Solar Lamp Seldom Used", "Never Used Solar Lamp")
+district_summary_solarLamp$VDC <- rownames(district_summary_solarLamp)
+district_summary <- merge(district_summary, district_summary_solarLamp, by.y = "VDC", by.x = "VDC")
+
 district_summary_disablity <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.physical_disability)%>% table())
 colnames(district_summary_disablity) <- c("Household Without Disablity","Household With Disablity")
 district_summary_disablity$VDC <- rownames(district_summary_disablity)
