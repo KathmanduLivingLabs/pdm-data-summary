@@ -46,6 +46,16 @@ makeSummary <- function(district, vdc_col){
 district_summary <- as.data.frame.matrix (district %>% group_by_(vdc_col) %>% select(sec_1.respondent.ethnicity_lst) %>% table())
 district_summary$VDC <- rownames(district_summary) 
 
+district_summary_disablity <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.physical_disability)%>% table())
+colnames(district_summary_disablity) <- c("Household Without Disablity","Household With Disablity")
+district_summary_disablity$VDC <- rownames(district_summary_disablity)
+district_summary <- merge(district_summary, district_summary_disablity, by.y = "VDC", by.x = "VDC")
+
+district_summary_debt <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_7.debt_quake)%>% table())
+colnames(district_summary_debt) <- c("No Debt Due to Earthquake","Debt Taken Due to Earthquake")
+district_summary_debt$VDC <- rownames(district_summary_debt)
+district_summary <- merge(district_summary, district_summary_debt, by.y = "VDC", by.x = "VDC")
+
 district_summary_solarLamp <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_4.lantern_use)%>% table())
 colnames(district_summary_solarLamp) <- c("Solar Lamp Used Daily","Solar Lamp Used 4-5 Times/Week", "Solar Lamp Used 2-3 Times/Week", "Solar Lamp Seldom Used", "Never Used Solar Lamp")
 district_summary_solarLamp$VDC <- rownames(district_summary_solarLamp)
@@ -81,10 +91,8 @@ names(district_summary_solarSavings) <- sub("5", "Solar Lamp Saves money: Strong
 district_summary_solarSavings$VDC <- rownames(district_summary_solarSavings)
 district_summary <- merge(district_summary, district_summary_solarSavings, by.y = "VDC", by.x = "VDC")
 
-district_summary_disablity <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.physical_disability)%>% table())
-colnames(district_summary_disablity) <- c("Household Without Disablity","Household With Disablity")
-district_summary_disablity$VDC <- rownames(district_summary_disablity)
-district_summary <- merge(district_summary, district_summary_disablity, by.y = "VDC", by.x = "VDC")
+district_summary_debtSpending <- district %>% group_by_(vdc_col) %>% summarise(FoodSpending = sum(sec_7.debt_earthquake.debt_food, na.rm = TRUE), HouseholdItemSpending = sum(sec_7.debt_earthquake.debt_basic_hh, na.rm = TRUE), ConstructionSpending = (sum (sec_7.debt_earthquake.debt_shelter, na.rm = TRUE) + sum(sec_7.debt_earthquake.debt_labor, na.rm = TRUE)), SavingAfterDebtSpending = sum(sec_7.debt_earthquake.debt_savings, na.rm = TRUE))
+district_summary <- merge(district_summary, district_summary_debtSpending, by.y = vdc_col, by.x = "VDC")
 
 district_summary_female <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.respondent_female)%>% table())
 colnames(district_summary_female) <- c("Respondent Male","Respondent Female")
@@ -96,7 +104,6 @@ colnames(district_summary_elderly) <- c("No Elderly","Has Elderly")
 district_summary_elderly$VDC <- rownames(district_summary_elderly)
 district_summary <- merge(district_summary, district_summary_elderly, by.y = "VDC", by.x = "VDC")
 
-# district_summary <- addColumnSummary(district, vdc_col, "sec_1.respondent.hh_categories.elderly_people",district_summary,  c("No Elderly","Has Elderly"))
 
 district_summary_pregnant <- as.data.frame.matrix (district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.pregnant_lactating_women) %>% table())
 colnames(district_summary_pregnant)<- c("No Preagnant Women","Has Pregnant Women")
