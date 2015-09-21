@@ -56,6 +56,13 @@ colnames(district_summary_debt) <- c("No Debt Due to Earthquake","Debt Taken Due
 district_summary_debt$VDC <- rownames(district_summary_debt)
 district_summary <- merge(district_summary, district_summary_debt, by.y = "VDC", by.x = "VDC")
 
+district_summary_solarLampNotRecieved <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_4.receive_lantern)%>% table())
+names(district_summary_solarLampNotRecieved) <- sub("1", "Recived Solar Lamp", names(district_summary_solarLampNotRecieved))
+names(district_summary_solarLampNotRecieved) <- sub("0", "Did not Recieve Solar Lamp", names(district_summary_solarLampNotRecieved))
+district_summary_solarLampNotRecieved$VDC <- rownames(district_summary_solarLampNotRecieved)
+district_summary <- merge(district_summary, district_summary_solarLampNotRecieved, by.y = "VDC", by.x = "VDC")
+
+
 district_summary_solarLamp <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_4.lantern_use)%>% table())
 colnames(district_summary_solarLamp) <- c("Solar Lamp Used Daily","Solar Lamp Used 4-5 Times/Week", "Solar Lamp Used 2-3 Times/Week", "Solar Lamp Seldom Used", "Never Used Solar Lamp")
 district_summary_solarLamp$VDC <- rownames(district_summary_solarLamp)
