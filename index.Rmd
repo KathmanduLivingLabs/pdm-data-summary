@@ -44,7 +44,9 @@ return (currentSummary)
 makeSummary <- function(district, vdc_col){
 
 district_summary <- as.data.frame.matrix (district %>% group_by_(vdc_col) %>% select(sec_1.respondent.ethnicity_lst) %>% table())
-district_summary$VDC <- rownames(district_summary) 
+district_summary$VDC <- rownames(district_summary)
+names(district_summary) <- sub("other", "Other", names(district_summary))
+names(district_summary) <- sub("Adibasi_Janjati_Newar", "Adibasi Janjati", names(district_summary))
 
 district_summary_disablity <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.physical_disability)%>% table())
 colnames(district_summary_disablity) <- c("Household Without Disablity","Household With Disablity")
