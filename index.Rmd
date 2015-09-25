@@ -100,6 +100,12 @@ names(district_summary_solarSavings) <- sub("5", "Solar Lamp Saves money: Strong
 district_summary_solarSavings$VDC <- rownames(district_summary_solarSavings)
 district_summary <- merge(district_summary, district_summary_solarSavings, by.y = "VDC", by.x = "VDC")
 
+district_summary_urgentItemsNotPresent <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_4.urgently_needed)%>% table())
+names(district_summary_urgentItemsNotPresent) <- sub("1", "Nedded Additional Urgent Items not Present in the Kit", names(district_summary_urgentItemsNotPresent))
+names(district_summary_urgentItemsNotPresent) <- sub("0", "Did not Require Additional Urgent Items", names(district_summary_urgentItemsNotPresent))
+district_summary_urgentItemsNotPresent$VDC <- rownames(district_summary_urgentItemsNotPresent)
+district_summary <- merge(district_summary, district_summary_urgentItemsNotPresent, by.y = "VDC", by.x = "VDC")
+
 district_summary_debtSpending <- district %>% group_by_(vdc_col) %>% summarise(FoodSpending = sum(sec_7.debt_earthquake.debt_food, na.rm = TRUE), HouseholdItemSpending = sum(sec_7.debt_earthquake.debt_basic_hh, na.rm = TRUE), ConstructionSpending = (sum (sec_7.debt_earthquake.debt_shelter, na.rm = TRUE) + sum(sec_7.debt_earthquake.debt_labor, na.rm = TRUE)), SavingAfterDebtSpending = sum(sec_7.debt_earthquake.debt_savings, na.rm = TRUE))
 district_summary <- merge(district_summary, district_summary_debtSpending, by.y = vdc_col, by.x = "VDC")
 
