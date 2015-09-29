@@ -48,6 +48,43 @@ district_summary$VDC <- rownames(district_summary)
 names(district_summary) <- sub("other", "Other", names(district_summary))
 names(district_summary) <- sub("Adibasi_Janjati_Newar", "Adibasi Janjati", names(district_summary))
 
+district_summary_HouseHoldMembers <- district %>% group_by_(vdc_col) %>% summarise( maleOne = sum(sec_1.hh_pop.male0_5, na.rm = TRUE), maleTwo = sum(sec_1.hh_pop.male6_11, na.rm = TRUE), maleThree = sum (sec_1.hh_pop.male12_24, na.rm = TRUE), maleFour = sum(sec_1.hh_pop.male25, na.rm = TRUE),femaleFive = sum(sec_1.hh_pop.female0_5, na.rm = TRUE), femaleSix = sum(sec_1.hh_pop.female6_11, na.rm = TRUE), femaleSeven = sum (sec_1.hh_pop.female12_24, na.rm = TRUE), femaleEight= sum(sec_1.hh_pop.female25, na.rm = TRUE), pop = sum(sec_1.hh_pop.total_hh_members, na.rm = TRUE)/n() )
+names(district_summary_HouseHoldMembers) <- sub("maleOne", "Total Male Population Aged 0-5", names(district_summary_HouseHoldMembers))
+names(district_summary_HouseHoldMembers) <- sub("maleTwo", "Total Male Population Aged 6-11", names(district_summary_HouseHoldMembers))
+names(district_summary_HouseHoldMembers) <- sub("maleThree", "Total Male Population Aged 12-24", names(district_summary_HouseHoldMembers))
+names(district_summary_HouseHoldMembers) <- sub("maleFour", "Total Male Population Aged Above 25", names(district_summary_HouseHoldMembers))
+names(district_summary_HouseHoldMembers) <- sub("femaleFive", "Total Female Population Aged 0-5", names(district_summary_HouseHoldMembers))
+names(district_summary_HouseHoldMembers) <- sub("femaleSix", "Total Female Population Aged 6-11", names(district_summary_HouseHoldMembers))
+names(district_summary_HouseHoldMembers) <- sub("femaleSeven", "Total Female Population Aged 12-24", names(district_summary_HouseHoldMembers))
+names(district_summary_HouseHoldMembers) <- sub("femaleEight", "Total Female Population Aged Above 25", names(district_summary_HouseHoldMembers))
+names(district_summary_HouseHoldMembers) <- sub("pop", "Average Members in Household", names(district_summary_HouseHoldMembers))
+district_summary <- merge(district_summary, district_summary_HouseHoldMembers, by.y = vdc_col, by.x = "VDC")
+
+
+district_summary_assistance <- district %>% group_by_(vdc_col) %>% summarise(Ast1 = table(sec_1.assistant_type.nfi)["True"], Ast2 = table(sec_1.assistant_type.cash)["True"], Ast3 = table(sec_1.assistant_type.food)["True"], Ast4 = table(sec_1.assistant_type.med)["True"], Ast5 = table(sec_1.assistant_type.gik)["True"], Ast6 = table(sec_1.assistant_type.tents)["True"], Ast7 = table(sec_1.assistant_type.other)["True"])
+names(district_summary_assistance) <- sub("Ast1", "Recived NFI After Earthquake", names(district_summary_assistance))
+names(district_summary_assistance) <- sub("Ast2", "Recived Cash After Earthquake", names(district_summary_assistance))
+names(district_summary_assistance) <- sub("Ast3", "Recived Food After Earthquake", names(district_summary_assistance))
+names(district_summary_assistance) <- sub("Ast4", "Recived Medical Care After Earthquake", names(district_summary_assistance))
+names(district_summary_assistance) <- sub("Ast5", "Recived Supplies of Temporary Shelter After Earthquake", names(district_summary_assistance))
+names(district_summary_assistance) <- sub("Ast6", "Recived Tents After Earthquake", names(district_summary_assistance))
+names(district_summary_assistance) <- sub("Ast7", "Recived Other Assistance After Earthquake", names(district_summary_assistance))
+district_summary <- merge(district_summary, district_summary_assistance, by.y = vdc_col, by.x = "VDC")
+
+district_summary_cashrecieved <- district %>% group_by_(vdc_col) %>% summarise(cs1 = table(sec_2.gen_cash_sources.relatives_friends)["True"], cs2 = table(sec_2.gen_cash_sources.government)["True"], cs3 = table(sec_2.gen_cash_sources.private_sector)["True"], cs4 = table(sec_2.gen_cash_sources.ngo)["True"])
+names(district_summary_cashrecieved) <- sub("cs1", "Recived Cash From Relative and Friends", names(district_summary_cashrecieved))
+names(district_summary_cashrecieved) <- sub("cs2", "Recived Cash From Government", names(district_summary_cashrecieved))
+names(district_summary_cashrecieved) <- sub("cs3", "Recived Cash From Private Sector", names(district_summary_cashrecieved))
+names(district_summary_cashrecieved) <- sub("cs4", "Recived Cash From NGO's", names(district_summary_cashrecieved))
+district_summary <- merge(district_summary, district_summary_cashrecieved, by.y = vdc_col, by.x = "VDC")
+
+
+district_summary_travletime <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_4.distribution.dist_travel)%>% table())
+colnames(district_summary_travletime) <- c("Travelled One Hour or Less","Travelled 1 to 2 Hours", "Travelled 2 to 3 Hours", "Travelled 3 to 4 Hours", "Travelled More Than 4 Hours", "Travel Time Unknown")
+district_summary_travletime$VDC <- rownames(district_summary_travletime)
+district_summary <- merge(district_summary, district_summary_travletime, by.y = "VDC", by.x = "VDC")
+
+
 district_summary_disablity <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.physical_disability)%>% table())
 colnames(district_summary_disablity) <- c("Household Without Disablity","Household With Disablity")
 district_summary_disablity$VDC <- rownames(district_summary_disablity)
@@ -106,6 +143,21 @@ names(district_summary_urgentItemsNotPresent) <- sub("0", "Did not Require Addit
 district_summary_urgentItemsNotPresent$VDC <- rownames(district_summary_urgentItemsNotPresent)
 district_summary <- merge(district_summary, district_summary_urgentItemsNotPresent, by.y = "VDC", by.x = "VDC")
 
+
+district_summary_itemsRequired <- district %>% group_by_(vdc_col) %>% summarise(Needs1 = table(sec_4.needs.1)["True"], Needs2 = table(sec_4.needs.2)["True"], Needs3 = table(sec_4.needs.3)["True"], Needs4 = table(sec_4.needs.4)["True"], Needs5 = table(sec_4.needs.5)["True"], Needs6 = table(sec_4.needs.6)["True"], Needs7 = table(sec_4.needs.7)["True"], Needs8 = table(sec_4.needs.8)["True"], Needs9 = table(sec_4.needs.9)["True"])
+names(district_summary_itemsRequired) <- sub("Needs1", "Needed: Shelter Construction Materials", names(district_summary_itemsRequired))
+names(district_summary_itemsRequired) <- sub("Needs2", "Nedded: Food", names(district_summary_itemsRequired))
+names(district_summary_itemsRequired) <- sub("Needs3", "Nedded: Clothing", names(district_summary_itemsRequired))
+names(district_summary_itemsRequired) <- sub("Needs4", "Nedded: Medical Supplies", names(district_summary_itemsRequired))
+names(district_summary_itemsRequired) <- sub("Needs5", "Nedded: Agricultural Inputs", names(district_summary_itemsRequired))
+names(district_summary_itemsRequired) <- sub("Needs6", "Nedded: Basic Household Items", names(district_summary_itemsRequired))
+names(district_summary_itemsRequired) <- sub("Needs7", "Nedded: Large Household Items", names(district_summary_itemsRequired))
+names(district_summary_itemsRequired) <- sub("Needs8", "Nedded: Hygine Products", names(district_summary_itemsRequired))
+names(district_summary_itemsRequired) <- sub("Needs9", "Nedded: Educational Materials", names(district_summary_itemsRequired))
+district_summary <- merge(district_summary, district_summary_itemsRequired, by.y = vdc_col, by.x = "VDC")
+
+
+
 district_summary_debtSpending <- district %>% group_by_(vdc_col) %>% summarise(FoodSpending = sum(sec_7.debt_earthquake.debt_food, na.rm = TRUE), HouseholdItemSpending = sum(sec_7.debt_earthquake.debt_basic_hh, na.rm = TRUE), ConstructionSpending = (sum (sec_7.debt_earthquake.debt_shelter, na.rm = TRUE) + sum(sec_7.debt_earthquake.debt_labor, na.rm = TRUE)), SavingAfterDebtSpending = sum(sec_7.debt_earthquake.debt_savings, na.rm = TRUE))
 district_summary <- merge(district_summary, district_summary_debtSpending, by.y = vdc_col, by.x = "VDC")
 
@@ -144,7 +196,15 @@ nuwakot_summary <- makeSummary(pdm_nuwakot, "sec_0.vdc_nawakot")
 write(toJSON(nuwakot_summary, preety = T),file = "JSONDump/nuwakot_summary.json")
 sindhupalchowk_summary <- makeSummary(pdm_sindhupalchowk, "sec_0.vdc_sindu")
 write(toJSON(sindhupalchowk_summary, preety = T),file = "JSONDump/sindhupalchowk_summary.json")
+district_level_summary <- makeSummary(pdm, "sec_0.district_lst")
+write(toJSON(district_level_summary, preety = T),file = "JSONDump/district_level_summary.json")
 ```
+
+##District Level Summary
+```{r, echo=FALSE, message=FALSE}
+knitr::kable(district_level_summary)
+```
+
 ##Dolakha Summary 
 ```{r, echo=FALSE, message=FALSE}
 knitr::kable(dolakha_summary)
