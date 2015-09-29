@@ -84,6 +84,11 @@ colnames(district_summary_travletime) <- c("Travelled One Hour or Less","Travell
 district_summary_travletime$VDC <- rownames(district_summary_travletime)
 district_summary <- merge(district_summary, district_summary_travletime, by.y = "VDC", by.x = "VDC")
 
+district_summary_travletransport <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_4.distribution.dist_mode)%>% table())
+colnames(district_summary_travletransport) <- c("Travelled by Animal","Travelled by Foot", "Travelled by Other Source", "Travelled by Porter ", "Travelled by Truck", "Travel by Motor Vehicle")
+district_summary_travletransport$VDC <- rownames(district_summary_travletransport)
+district_summary <- merge(district_summary, district_summary_travletransport, by.y = "VDC", by.x = "VDC")
+
 
 district_summary_disablity <- as.data.frame.matrix(district %>% group_by_(vdc_col) %>% select(sec_1.respondent.hh_categories.physical_disability)%>% table())
 colnames(district_summary_disablity) <- c("Household Without Disablity","Household With Disablity")
